@@ -112,7 +112,7 @@
                 gl.getUniformLocation(program, "projectionMatrix");
             const colorLoc = gl.getUniformLocation(program, "uColor");
 
-            const view = lookAt(
+            let view = lookAt(
                 vec3(0, 6, 10),
                 vec3(0, 0, -3),
                 vec3(0, 1, 0)
@@ -146,18 +146,46 @@
 
             let playerLane = 0;
             let textbookY = 3.5;
+            let cameraAngle = 0;
 
-            document.addEventListener("keydown", function(event) {
-             if (event.key.toLowerCase() === "a" && playerLane > -1) {
-                playerLane--;
-                render();
-            }
+            
+document.addEventListener("keydown", function(event) {
 
+    // A moves the player left
+    if (event.key.toLowerCase() === "a" && playerLane > -1) {
+        playerLane--;
+        render();
+    }
+
+    // D moves the player right
     if (event.key.toLowerCase() === "d" && playerLane < 1) {
         playerLane++;
         render();
     }
+
+    // Q rotates the camera left
+    if (event.key.toLowerCase() === "q") {
+        cameraAngle -= 0.15;
+    }
+
+    // E rotates the camera right
+    if (event.key.toLowerCase() === "e") {
+        cameraAngle += 0.15;
+    }
+
+    // Update the camera position
+    view = lookAt(
+        vec3(
+            13 * Math.sin(cameraAngle),
+            6,
+            -3 + 13 * Math.cos(cameraAngle)
+        ),
+        vec3(0, 0, -3),
+        vec3(0, 1, 0)
+    );
+
 });
+
 
             function render() {
                 gl.clear(
