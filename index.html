@@ -145,6 +145,7 @@
             }
 
             let playerLane = 0;
+            let textbookY = 3.5;
 
             document.addEventListener("keydown", function(event) {
              if (event.key.toLowerCase() === "a" && playerLane > -1) {
@@ -183,6 +184,13 @@
                     playerLane * 2, 0.05, 0.75, 0.65, 0.8, 0.65,
                     vec4(0.95, 0.55, 0.30, 1)
                 );
+                
+            // Falling textbook
+                drawCube(
+                    -2, textbookY, -2, 0.95, 0.3, 0.7,
+                    vec4(0.85, 0.25, 0.35, 1)
+                );
+
 
 
                 drawCube(
@@ -196,7 +204,21 @@
                 );
             }
 
-            render();
+            
+function animate() {
+    textbookY -= 0.025;
+
+    // Start falling again when the textbook reaches the floor
+    if (textbookY < 0.05) {
+        textbookY = 3.5;
+    }
+
+    render();
+    requestAnimationFrame(animate);
+}
+
+animate();
+
         }
     </script>
 </body>
