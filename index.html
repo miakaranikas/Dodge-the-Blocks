@@ -1,0 +1,42 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dodge the Blocks</title>
+    <style>
+        body {
+            background-color: #20243a;
+            color: white;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+
+        canvas {
+            border: 2px solid white;
+            width: 90%;
+            max-width: 900px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Dodge the Blocks</h1>
+    <p>School Survival Game</p>
+
+    <canvas id="gl-canvas" width="900" height="500"></canvas>
+
+    <p>Use A and D to move between lanes.</p>
+
+    <script>
+        const canvas = document.getElementById("gl-canvas");
+        const gl = canvas.getContext("webgl");
+
+        if (!gl) {
+            alert("WebGL is not supported.");
+        } else {
+            gl.clearColor(0.55, 0.75, 0.95, 1.0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+        }
+    </script>
+</body>
+</html>
