@@ -27,6 +27,27 @@
 
     <p>Use A and D to move between lanes.</p>
 
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        attribute vec4 vPosition;
+
+        uniform mat4 modelViewMatrix;
+        uniform mat4 projectionMatrix;
+
+        void main() {
+            gl_Position = projectionMatrix * modelViewMatrix * vPosition;
+        }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+
+        uniform vec4 uColor;
+
+        void main() {
+            gl_FragColor = uColor;
+        }
+    </script>
+
     <script src="MV.js"></script>
     <script src="initShaders.js"></script>
 
@@ -37,8 +58,124 @@
         if (!gl) {
             alert("WebGL is not supported.");
         } else {
+            gl.viewport(0, 0, canvas.width, canvas.height);
             gl.clearColor(0.55, 0.75, 0.95, 1.0);
-            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.enable(gl.DEPTH_TEST);
+
+            const program = initShaders(
+                gl, "vertex-shader", "fragment-shader"
+            );
+            gl.useProgram(program);
+
+            const vertices = [
+                vec4(-0.5, -0.5,  0.5, 1),
+                vec4(-0.5,  0.5,  0.5, 1),
+                vec4( 0.5,  0.5,  0.5, 1),
+                vec4( 0.5, -0.5,  0.5, 1),
+                vec4(-0.5, -0.5, -0.5, 1),
+                vec4(-0.5,  0.5, -0.5, 1),
+                vec4( 0.5,  0.5, -0.5, 1),
+                vec4( 0.5, -0.5, -0.5, 1)
+            ];
+
+            const points = [];
+
+            function quad(a, b, c, d) {
+                points.push(
+                    vertices[a], vertices[b], vertices[c],
+                    vertices[a], vertices[c], vertices[d]
+                );
+            }
+
+            quad(1, 0, 3, 2);
+            quad(2, 3, 7, 6);
+            quad(3, 0, 4, 7);
+            quad(6, 5, 1, 2);
+            quad(4, 5, 6, 7);
+            quad(5, 4, 0, 1);
+
+            const buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+            gl.bufferData(
+                gl.ARRAY_BUFFER,
+                flatten(points),
+                gl.STATIC_DRAW
+            );
+
+            const vPosition = gl.getAttribLocation(program, "vPosition");
+            gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(vPosition);
+
+            const modelViewLoc =
+                gl.getUniformLocation(program, "modelViewMatrix");
+            const projectionLoc =
+                gl.getUniformLocation(program, "projectionMatrix");
+            const colorLoc = gl.getUniformLocation(program, "uColor");
+
+            const view = lookAt(
+                vec3(0, 6, 10),
+                vec3(0, 0, -3),
+                vec3(0, 1, 0)
+            );
+
+            const projection = perspective(
+                45,
+                canvas.width / canvas.height,
+                0.1,
+                100
+            );
+
+            gl.uniformMatrix4fv(
+                projectionLoc, false, flatten(projection)
+            );
+
+            function drawCube(x, y, z, sx, sy, sz, color) {
+                const model = mult(
+                    translate(x, y, z),
+                    scalem(sx, sy, sz)
+                );
+
+                const modelView = mult(view, model);
+
+                gl.uniformMatrix4fv(
+                    modelViewLoc, false, flatten(modelView)
+                );
+                gl.uniform4fv(colorLoc, color);
+                gl.drawArrays(gl.TRIANGLES, 0, points.length);
+            }
+
+            function render() {
+                gl.clear(
+                    gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT
+                );
+
+                drawCube(
+                    -2, -0.5, -2, 1.8, 0.25, 8,
+                    vec4(0.75, 0.80, 0.95, 1)
+                );
+
+                drawCube(
+                    0, -0.5, -2, 1.8, 0.25, 8,
+                    vec4(0.90, 0.90, 0.95, 1)
+                );
+
+                drawCube(
+                    2, -0.5, -2, 1.8, 0.25, 8,
+                    vec4(0.75, 0.80, 0.95, 1)
+                );
+
+                drawCube(
+                    -3.1, 0.7, -2, 0.3, 2.5, 8,
+                    vec4(0.55, 0.65, 0.85, 1)
+                );
+
+                drawCube(
+                    3.1, 0.7, -2, 0.3, 2.5, 8,
+                    vec4(0.55, 0.65, 0.85, 1)
+                );
+            }
+
+            render();
         }
     </script>
 </body>
